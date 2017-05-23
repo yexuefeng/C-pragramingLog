@@ -1,0 +1,46 @@
+/*************************************************************************
+	> File Name: C++用法新得.log
+	> Author: ye xuefeng
+	> Date: Tue 23 May 2017 07:02:32 PM CST
+ ************************************************************************/
+1. 对一个const对象调用non-const对象是不允许的，因为non-const成员函数可能会
+修改const对象，因此编译器做了一个安全假定，不允许const调用non-const成员函数,
+例如：
+    void Socket::sock_bind(const InetAddr & address)
+    {
+        struct sockaddr_in peeraddr;
+        memset(&peeraddr, 0, sizeof(peeraddr));
+        peeraddr = address.addr_get();
+        ......
+    }
+
+    如果addr_get()成员函数采用如下声明:
+    class InetAddr
+    {
+        ......
+        struct sockaddr_in addr_get(); // error usage
+        ......
+    }
+    则在编译时出现如下错误: error: passing 'const InetAddr' as 'this' argument
+    of 'sockaddr_in InetAddr::addr_get()' discards qualifiers
+    解决上述问题需要将addr_get()成员函数声明为常量成员，如下所示：
+    class InetAddr
+    {
+        ......
+        struct sockaddr_in addr_get() const; //right usage
+        ......
+    }
+
+2. 在使用accept函数时有两种用法：
+   struct sockaddr_in addr;
+   socklen_t addrlen = sizeof(addr);
+   int sockfd = accept(sfd, (struct sockaddr *)&addr, &addrlen);
+   或者
+   int sockfd = accept(sfd, NULL, NULL);
+   在采用第一种用法，一定要注意addrlen参数初始化，不可以按如下方式
+   使用：
+   struct sockaddr_in addr;
+   socklen_t addrlen;
+   int sockfd = accept(sfd, (struct sockaddr *)&addr, &addrlen);
+
+
