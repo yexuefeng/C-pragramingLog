@@ -69,3 +69,20 @@ C++中有两个getline函数，一个是在string头文件中，定义的是全�
 *   在C语言中:
 >   getline函数定义在头文件stdio.h中，该函数的声明如下所示:`ssize_t getline(char **lineptr, size_t *n, FILE *stream)`
 >   getline() reads an entire line from stream, storing the address of the buffer containing the text into `*lineptr`.  The buffer is null-terminated and includes the newline character, if one was found. If `*lineptr` is NULL, then getline() will allocate a buffer for storing the line, which should be freed by the user program.  (In this case, the value in `*n` is ignored.) Alternatively,  before  calling  getline(),  `*lineptr` can contain a pointer to a malloc(3)-allocated buffer `*n` bytes in size.  If the buffer is not large enough to hold the line, getline() resizes it with realloc(3), updating `*lineptr` and `*n` as necessary. In either case, on a successful call,`*lineptr` and `*n` will be updated to reflect the buffer address and allocated size respectively
+
+### 2018年 03月 14日 星期三
+1.关于decltype类型说明符存在如下容易出错的地方:
+A. decltype处理顶层const和引用的方式与auto不同, 如果decltype使用的表达式是一个变量，则decltype返回该变量的类型(包括顶层const和引用在内);
+B. decltype如果使用的是不加括号的变量,　则得到的结果是就是该变量类型; 如果给变量多加一层或多层括号，此时编译器会把它当成是一个表达式, 变量是一种可以作为赋值语句左值的特殊表达式，因此此时decltype就会得到引用类型;
+例如: int i; 
+      decltype((i)) d;  //错误: d是int&, 必须初始化;
+      decltype(i)   e;  //正确: e是一个未初始化的int;
+C. 如果表达式的内容是解引用操作，则decltype将得到引用类型;
+D. 将decltype作用与某个函数时, 它返回函数类型而非指针类型, 因此需要显示地加上`*`以表明需要返回指针, 而非函数本身;
+例如: string::size_type sumLength(const string&, const string&);
+      decltype(sumLength) *getFcn(const string &s);
+
+### 2018年 03月 23日 星期五
+1.当执行一个运算时，如果它的一个运算数是有符号的而另一个是无符号的，那么C语言会隐式地将有符号参数强制类型转换为无符号参数，并假设这两个数都是非负的.
+2.强制类型转换的结果保持位值不变，只是改变了解释这些位的方式.
+3.当将一个w为的数截断为一个k位数字时，我们会丢弃高w-k位.
